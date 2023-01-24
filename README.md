@@ -740,12 +740,13 @@ place_2.amenities.append(amenity_3)
 storage.save()
 
 print("OK")
-
+```
 guillaume@ubuntu:~/AirBnB_v2$ 
 guillaume@ubuntu:~/AirBnB_v2$ HBNB_MYSQL_USER=hbnb_dev HBNB_MYSQL_PWD=hbnb_dev_pwd HBNB_MYSQL_HOST=localhost HBNB_MYSQL_DB=hbnb_dev_db HBNB_TYPE_STORAGE=db ./main_place_amenities.py
 OK
 guillaume@ubuntu:~/AirBnB_v2$ 
 guillaume@ubuntu:~/AirBnB_v2$ echo 'SELECT * FROM amenities\G' | mysql -uhbnb_dev -p hbnb_dev_db
+```
 Enter password: 
 *************************** 1. row ***************************
         id: 47321eb8-152a-46df-969a-440aa67a6d59
