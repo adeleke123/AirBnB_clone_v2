@@ -1,28 +1,87 @@
-# puppet manifest preparing a server for static content deployment
-exec { 'apt-get-update':
-  command => '/usr/bin/env apt-get -y update',
+# AirBnB clone web server setup and configuration
+
+$nginx_conf = "server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    add_header X-Served-By ${hostname};
+    root   /var/www/html;
+    index  index.html index.htm;
+    location /hbnb_static {
+        alias /data/web_static/current;
+        index index.html index.htm;
+    }
+    location /redirect_me {
+        return 301 http://badeleke.tech/;
+    }
+    error_page 404 /404.html;
+    location /404 {
+      root /var/www/html;
+      internal;
+    }
+}"
+
+package { 'nginx':
+  ensure   => 'present',
+  provider => 'apt'
 }
--> exec {'b':
-  command => '/usr/bin/env apt-get -y install nginx',
+
+-> file { '/data':
+  ensure  => 'directory'
 }
--> exec {'c':
-  command => '/usr/bin/env mkdir -p /data/web_static/releases/test/',
+
+-> file { '/data/web_static':
+  ensure => 'directory'
 }
--> exec {'d':
-  command => '/usr/bin/env mkdir -p /data/web_static/shared/',
+
+-> file { '/data/web_static/releases':
+  ensure => 'directory'
 }
--> exec {'e':
-  command => '/usr/bin/env echo "Puppet x Holberton School" > /data/web_static/releases/test/index.html',
+
+-> file { '/data/web_static/releases/test':
+  ensure => 'directory'
 }
--> exec {'f':
-  command => '/usr/bin/env ln -sf /data/web_static/releases/test /data/web_static/current',
+
+-> file { '/data/web_static/shared':
+  ensure => 'directory'
 }
--> exec {'h':
-  command => '/usr/bin/env sed -i "/listen 80 default_server/a location /hbnb_static/ { alias /data/web_static/current/;}" /etc/nginx/sites-available/default',
+
+-> file { '/data/web_static/releases/test/index.html':
+  ensure  => 'present',
+  content => "this webpage is found in data/web_static/releases/test/index.htm \n"
 }
--> exec {'i':
-  command => '/usr/bin/env service nginx restart',
+
+-> file { '/data/web_static/current':
+  ensure => 'link',
+  target => '/data/web_static/releases/test'
 }
--> exec {'g':
-  command => '/usr/bin/env chown -R ubuntu:ubuntu /data',
+
+-> exec { 'chown -R ubuntu:ubuntu /data/':
+  path => '/usr/bin/:/usr/local/bin/:/bin/'
+}
+
+file { '/var/www':
+  ensure => 'directory'
+}
+
+-> file { '/var/www/html':
+  ensure => 'directory'
+}
+
+-> file { '/var/www/html/index.html':
+  ensure  => 'present',
+  content => "This is my first upload  in /var/www/index.html***\n"
+}
+
+-> file { '/var/www/html/404.html':
+  ensure  => 'present',
+  content => "Ceci n'est pas une page - Error page\n"
+}
+
+-> file { '/etc/nginx/sites-available/default':
+  ensure  => 'present',
+  content => $nginx_conf
+}
+
+-> exec { 'nginx restart':
+  path => '/etc/init.d/'
 }
